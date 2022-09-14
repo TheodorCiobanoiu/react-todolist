@@ -1,24 +1,22 @@
 import './App.css';
 import {useForm} from "react-hook-form";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import ToDo from "./components/ToDo";
+
 const App = () => {
 
     const [toDoData, setData] = useState([]);
-    const { register, handleSubmit } = useForm();
+    const {register, handleSubmit} = useForm();
+
+    useEffect(() => {
+        syncWithServer();
+    }, []);
 
     const deleteToDo = (toDoDelete) => {
-        setData(toDoData.filter((item) => (item !== toDoDelete)));
-        //TODO: Make 'DELETE' request to back-end to delete ToDo
-        fetch('http://localhost:8090/todo/delete/' + toDoDelete.id,{method: 'DELETE'}).then();
-        syncWithServer();
+        fetch('http://localhost:8090/todo/delete/' + toDoDelete.id, {method: 'DELETE'}).then(() => syncWithServer());
     }
 
     const onSubmit = (data, e) => {
-        console.log("DATA OBJECT")
-        console.log(data, e);
-        console.log(toDoData);
-        //TODO: Make 'POST' request to back-end to save new ToDo
         fetch('http://localhost:8090/todo/save',{
             method:'POST',
             body: JSON.stringify(data),
@@ -26,11 +24,9 @@ const App = () => {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             }
-        }).then();
-        syncWithServer();
+        }).then(() => syncWithServer());
     };
 
-    //TODO: Make 'GET' method to get all ToDo's from back-end
     const syncWithServer = () =>{
         fetch('http://localhost:8090/todo/get')
             .then(response => response.json())
@@ -54,7 +50,7 @@ const App = () => {
             </form>
             <ul>
                 {toDoData.map((item, index) => {
-                return <li key={index}><ToDo todo={item.todo} deleteToDo={deleteToDo}/></li>
+                    return <li key={index}><ToDo todo={item} deleteToDo={deleteToDo}/></li>
             })}
             </ul>
         </div>
